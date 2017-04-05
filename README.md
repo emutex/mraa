@@ -30,6 +30,7 @@ X86
 * [Minnowboard](../master/docs/minnow_max.md)
 * [NUC 5th generation](../master/docs/intel_nuc5.md)
 * [UP](../master/docs/up.md)
+* UP Squared
 * [Intel Joule](../master/docs/joule.md)
 
 ARM
