@@ -127,9 +127,9 @@ mraa_up2_board()
     mraa_up2_set_pininfo(b, 0, "INVALID",    (mraa_pincapabilities_t) {0, 0, 0, 0, 0, 0, 0, 0}, -1);
     mraa_up2_set_pininfo(b, 1, "3.3v",       (mraa_pincapabilities_t) {0, 0, 0, 0, 0, 0, 0, 0}, -1);
     mraa_up2_set_pininfo(b, 2, "5v",         (mraa_pincapabilities_t) {0, 0, 0, 0, 0, 0, 0, 0}, -1);
-    mraa_up2_set_pininfo(b, 3, "I2C1_SDA",   (mraa_pincapabilities_t) {1, 1, 0, 0, 0, 1, 0, 0}, MRAA_UP2_WEST_BASE + 2);
+    mraa_up2_set_pininfo(b, 3, "I2C1_SDA",   (mraa_pincapabilities_t) {1, 1, 0, 0, 0, 1, 0, 0}, MRAA_UP2_NORTH_BASE + 28);
     mraa_up2_set_pininfo(b, 4, "5v",         (mraa_pincapabilities_t) {0, 0, 0, 0, 0, 0, 0, 0}, -1);
-    mraa_up2_set_pininfo(b, 5, "I2C1_SCL",   (mraa_pincapabilities_t) {1, 1, 0, 0, 0, 1, 0, 0}, MRAA_UP2_WEST_BASE + 3);
+    mraa_up2_set_pininfo(b, 5, "I2C1_SCL",   (mraa_pincapabilities_t) {1, 1, 0, 0, 0, 1, 0, 0}, MRAA_UP2_NORTH_BASE + 29);
     mraa_up2_set_pininfo(b, 6, "GND",        (mraa_pincapabilities_t) {0, 0, 0, 0, 0, 0, 0, 0}, -1);
     mraa_up2_set_pininfo(b, 7, "ADC0",       (mraa_pincapabilities_t) {1, 1, 0, 0, 0, 0, 1, 0}, MRAA_UP2_NORTHWEST_BASE + 76);
     mraa_up2_set_pininfo(b, 8, "UART1_TX",   (mraa_pincapabilities_t) {1, 1, 0, 0, 0, 0, 0, 1}, MRAA_UP2_NORTH_BASE + 43);
@@ -151,8 +151,8 @@ mraa_up2_board()
     mraa_up2_set_pininfo(b, 24, "SPI0_CS0",  (mraa_pincapabilities_t) {1, 1, 0, 0, 1, 0, 0, 0}, MRAA_UP2_NORTHWEST_BASE + 62);
     mraa_up2_set_pininfo(b, 25, "GND",       (mraa_pincapabilities_t) {0, 0, 0, 0, 0, 0, 0, 0}, -1);
     mraa_up2_set_pininfo(b, 26, "SPI0_CS1",  (mraa_pincapabilities_t) {1, 1, 0, 0, 1, 0, 0, 0}, MRAA_UP2_NORTHWEST_BASE + 63);
-    mraa_up2_set_pininfo(b, 27, "I2C0_SDA",  (mraa_pincapabilities_t) {1, 1, 0, 0, 0, 1, 0, 0}, MRAA_UP2_WEST_BASE + 0);
-    mraa_up2_set_pininfo(b, 28, "I2C0_SCL",  (mraa_pincapabilities_t) {1, 1, 0, 0, 0, 1, 0, 0}, MRAA_UP2_WEST_BASE + 1);
+    mraa_up2_set_pininfo(b, 27, "I2C0_SDA",  (mraa_pincapabilities_t) {1, 1, 0, 0, 0, 1, 0, 0}, MRAA_UP2_NORTH_BASE + 30);
+    mraa_up2_set_pininfo(b, 28, "I2C0_SCL",  (mraa_pincapabilities_t) {1, 1, 0, 0, 0, 1, 0, 0}, MRAA_UP2_NORTH_BASE + 31);
     mraa_up2_set_pininfo(b, 29, "GPIO5",     (mraa_pincapabilities_t) {1, 1, 0, 0, 0, 0, 0, 0}, MRAA_UP2_NORTHWEST_BASE + 73);
     mraa_up2_set_pininfo(b, 30, "GND",       (mraa_pincapabilities_t) {0, 0, 0, 0, 0, 0, 0, 0}, -1);
     mraa_up2_set_pininfo(b, 31, "GPIO6",     (mraa_pincapabilities_t) {1, 1, 0, 0, 0, 0, 0, 0}, MRAA_UP2_NORTHWEST_BASE + 47);
