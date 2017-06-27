@@ -63,8 +63,7 @@ mraa_up2_set_pininfo(mraa_board_t* board, int mraa_index, char* name,
             pin_info->gpio.mux_total = 0;
         }
         if (caps.pwm) {
-            int controller = 0;
-            pin_info->pwm.parent_id = (unsigned int) controller;
+            pin_info->pwm.parent_id = 0;
             pin_info->pwm.pinmap = 0;
             pin_info->pwm.mux_total = 0;
         }
@@ -131,16 +130,16 @@ mraa_up2_board()
     mraa_up2_set_pininfo(b, 4, "5v",         (mraa_pincapabilities_t) {0, 0, 0, 0, 0, 0, 0, 0}, -1);
     mraa_up2_set_pininfo(b, 5, "I2C1_SCL",   (mraa_pincapabilities_t) {1, 1, 0, 0, 0, 1, 0, 0}, MRAA_UP2_NORTH_BASE + 29);
     mraa_up2_set_pininfo(b, 6, "GND",        (mraa_pincapabilities_t) {0, 0, 0, 0, 0, 0, 0, 0}, -1);
-    mraa_up2_set_pininfo(b, 7, "ADC0",       (mraa_pincapabilities_t) {1, 1, 0, 0, 0, 0, 1, 0}, MRAA_UP2_NORTHWEST_BASE + 76);
+    mraa_up2_set_pininfo(b, 7, "ADC0",       (mraa_pincapabilities_t) {1, 1, 0, 0, 0, 0, 0, 0}, MRAA_UP2_NORTHWEST_BASE + 76);
     mraa_up2_set_pininfo(b, 8, "UART1_TX",   (mraa_pincapabilities_t) {1, 1, 0, 0, 0, 0, 0, 1}, MRAA_UP2_NORTH_BASE + 43);
     mraa_up2_set_pininfo(b, 9, "GND",        (mraa_pincapabilities_t) {0, 0, 0, 0, 0, 0, 0, 0}, -1);
     mraa_up2_set_pininfo(b, 10, "UART1_RX",  (mraa_pincapabilities_t) {1, 1, 0, 0, 0, 0, 0, 1}, MRAA_UP2_NORTH_BASE + 42);
-    mraa_up2_set_pininfo(b, 11, "UART1_RTS", (mraa_pincapabilities_t) {1, 1, 0, 0, 0, 0, 1, 1}, MRAA_UP2_NORTH_BASE + 44); // also ADC1
+    mraa_up2_set_pininfo(b, 11, "UART1_RTS", (mraa_pincapabilities_t) {1, 1, 0, 0, 0, 0, 0, 1}, MRAA_UP2_NORTH_BASE + 44); // also ADC1
     mraa_up2_set_pininfo(b, 12, "I2S_CLK",   (mraa_pincapabilities_t) {1, 1, 0, 0, 0, 0, 0, 0}, MRAA_UP2_WEST_BASE + 16);
-    mraa_up2_set_pininfo(b, 13, "ADC2",      (mraa_pincapabilities_t) {1, 1, 0, 0, 0, 0, 1, 0}, MRAA_UP2_NORTHWEST_BASE + 75);
+    mraa_up2_set_pininfo(b, 13, "ADC2",      (mraa_pincapabilities_t) {1, 1, 0, 0, 0, 0, 0, 0}, MRAA_UP2_NORTHWEST_BASE + 75);
     mraa_up2_set_pininfo(b, 14, "GND",       (mraa_pincapabilities_t) {0, 0, 0, 0, 0, 0, 0, 0}, -1);
-    mraa_up2_set_pininfo(b, 15, "ADC3",      (mraa_pincapabilities_t) {1, 1, 0, 0, 0, 0, 1, 0}, MRAA_UP2_NORTHWEST_BASE + 74);
-    mraa_up2_set_pininfo(b, 16, "GPIO23",    (mraa_pincapabilities_t) {1, 1, 0, 0, 0, 0, 0, 0}, MRAA_UP2_NORTH_BASE + 37);
+    mraa_up2_set_pininfo(b, 15, "ADC3",      (mraa_pincapabilities_t) {1, 1, 0, 0, 0, 0, 0, 0}, MRAA_UP2_NORTHWEST_BASE + 74);
+    mraa_up2_set_pininfo(b, 16, "PWM3",      (mraa_pincapabilities_t) {1, 1, 1, 0, 0, 0, 0, 0}, MRAA_UP2_NORTH_BASE + 37);
     mraa_up2_set_pininfo(b, 17, "3.3v",      (mraa_pincapabilities_t) {0, 0, 0, 0, 0, 0, 0, 0}, -1);
     mraa_up2_set_pininfo(b, 18, "GPIO24",    (mraa_pincapabilities_t) {1, 1, 0, 0, 0, 0, 0, 0}, MRAA_UP2_NORTHWEST_BASE + 48);
     mraa_up2_set_pininfo(b, 19, "SPI0_MOSI", (mraa_pincapabilities_t) {1, 1, 0, 0, 1, 0, 0, 0}, MRAA_UP2_NORTHWEST_BASE + 65);
@@ -193,10 +192,24 @@ mraa_up2_board()
     }
 
     // Configure PWM
+    b->pwm_dev_count = 0;
+    b->def_pwm_dev = 0;
     b->pwm_default_period = 5000;
     b->pwm_max_period = 218453;
     b->pwm_min_period = 1;
-
+    
+    // set the correct pwm channels for pwm 1 2 3
+    b->pins[32].pwm.parent_id = 0;
+    b->pins[32].pwm.pinmap = 0;
+    b->pwm_dev_count++;
+    b->pins[33].pwm.parent_id = 0;
+    b->pins[33].pwm.pinmap = 1;
+    b->pwm_dev_count++;
+    b->pins[16].pwm.parent_id = 0;
+    b->pins[16].pwm.pinmap = 3;
+    b->pwm_dev_count++;
+    
+    // Configure SPI
     b->spi_bus_count = 0;
     b->def_spi_bus = 0;
 
@@ -217,10 +230,13 @@ mraa_up2_board()
     mraa_up2_get_pin_index(b, "SPI0_MISO", &(b->spi_bus[1].miso));
     mraa_up2_get_pin_index(b, "SPI0_CLK",  &(b->spi_bus[1].sclk));
     b->spi_bus_count++;
+    
+    // FIXME: add spi2 when we change pinout
 
+    // Configure UART
     b->uart_dev_count = 0;
     b->def_uart_dev = 0;
-    b->uart_dev[0].device_path = "/dev/ttyS4";
+    b->uart_dev[0].device_path = "/dev/ttyS1";
 
     // Configure UART #1 (default)
     mraa_up2_get_pin_index(b, "UART1_RX", &(b->uart_dev[0].rx));
@@ -230,9 +246,7 @@ mraa_up2_board()
     b->uart_dev_count++;
 
     // Configure ADCs
-    b->aio_count = 4;
-    b->adc_raw = 12;
-    b->adc_supported = 12;
+    b->aio_count = 0;
 
     const char* pinctrl_path = "/sys/bus/platform/drivers/upboard-pinctrl";
     int have_pinctrl = access(pinctrl_path, F_OK) != -1;
