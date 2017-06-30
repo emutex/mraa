@@ -166,7 +166,6 @@ mraa_up2_board()
     mraa_up2_set_pininfo(b, 40, "I2S_DOUT",  (mraa_pincapabilities_t) {1, 1, 0, 0, 0, 0, 0, 0}, MRAA_UP2_WEST_BASE + 19);
 
     b->i2c_bus_count = 0;
-    b->def_i2c_bus = 0;
     int i2c_bus_num;
 
     // Configure I2C adaptor #0 (default)
@@ -178,6 +177,7 @@ mraa_up2_board()
         mraa_up2_get_pin_index(b, "I2C1_SDA", &(b->i2c_bus[i].sda));
         mraa_up2_get_pin_index(b, "I2C1_SCL", &(b->i2c_bus[i].scl));
         b->i2c_bus_count++;
+        b->def_i2c_bus = i2c_bus_num;
     }
 
     // Configure I2C adaptor #1
@@ -197,7 +197,7 @@ mraa_up2_board()
     b->pwm_default_period = 5000;
     b->pwm_max_period = 218453;
     b->pwm_min_period = 1;
-    
+
     // set the correct pwm channels for pwm 1 2 3
     b->pins[32].pwm.parent_id = 0;
     b->pins[32].pwm.pinmap = 0;
@@ -208,7 +208,7 @@ mraa_up2_board()
     b->pins[16].pwm.parent_id = 0;
     b->pins[16].pwm.pinmap = 3;
     b->pwm_dev_count++;
-    
+
     // Configure SPI
     b->spi_bus_count = 0;
     b->def_spi_bus = 0;
@@ -230,7 +230,7 @@ mraa_up2_board()
     mraa_up2_get_pin_index(b, "SPI0_MISO", &(b->spi_bus[1].miso));
     mraa_up2_get_pin_index(b, "SPI0_CLK",  &(b->spi_bus[1].sclk));
     b->spi_bus_count++;
-    
+
     // FIXME: add spi2 when we change pinout
 
     // Configure UART
