@@ -232,7 +232,7 @@ typedef enum {
 } Pinmodes;
 
 /**
- * Enum reprensenting different i2c speeds/modes
+ * Enum representing different i2c speeds/modes
  */
 typedef enum {
     I2C_STD = 0,  /**< up to 100Khz */
@@ -240,6 +240,9 @@ typedef enum {
     I2C_HIGH = 2  /**< up to 3.4Mhz */
 } I2cMode;
 
+/**
+ * Enum representing different uart parity states
+ */
 typedef enum {
     UART_PARITY_NONE = 0,
     UART_PARITY_EVEN = 1,

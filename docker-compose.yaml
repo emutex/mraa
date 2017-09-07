@@ -2,83 +2,151 @@ version: '2.1'
 
 services:
 
-  main:
-    build:
-      context: .
-      dockerfile: Dockerfile
-      args:
-        - http_proxy
-        - https_proxy
-        - no_proxy
-        - BUILDDOC=${BUILDDOC:-OFF}
-        - BUILDSWIG=${BUILDSWIG:-OFF}
-        - BUILDSWIGPYTHON=${BUILDSWIGPYTHON:-OFF}
-        - BUILDSWIGJAVA=${BUILDSWIGJAVA:-OFF}
-        - BUILDSWIGNODE=${BUILDSWIGNODE:-OFF}
-        - USBPLAT=${USBPLAT:-OFF}
-        - FIRMATA=${FIRMATA:-OFF}
-        - ONEWIRE=${ONEWIRE:-OFF}
-        - JSONPLAT=${JSONPLAT:-OFF}
-        - IMRAA=${IMRAA:-OFF}
-        - FTDI4222=${FTDI4222:-OFF}
-        - IPK=${IPK:-OFF}
-        - RPM=${RPM:-OFF}
-        - ENABLEEXAMPLES=${ENABLEEXAMPLES:-ON}
-        - INSTALLGPIOTOOL=${INSTALLGPIOTOOL:-OFF}
-        - INSTALLTOOLS=${INSTALLTOOLS:-OFF}
-        - BUILDTESTS=${BUILDTESTS:-ON}
-        - CC=${CC:-clang-3.8}
-        - CXX=${CXX:-clang++-3.8}
-        - NODE_VERSION=${NODE_VERSION:-v4.4.7}
-        - BUILDARCH=${BUILDARCH}
+  base:
+    image: dnoliver/mraa-base
     environment:
       - http_proxy
       - https_proxy
       - no_proxy
+      - BUILDDOC=${BUILDDOC:-OFF}
+      - BUILDSWIG=${BUILDSWIG:-OFF}
+      - BUILDSWIGPYTHON=${BUILDSWIGPYTHON:-OFF}
+      - BUILDTESTS=${BUILDTESTS:-ON}
+      - USEPYTHON3TESTS=${USEPYTHON3TESTS:-OFF}
+      - BUILDSWIGJAVA=${BUILDSWIGJAVA:-OFF}
+      - BUILDSWIGNODE=${BUILDSWIGNODE:-OFF}
+      - USBPLAT=${USBPLAT:-OFF}
+      - FIRMATA=${FIRMATA:-OFF}
+      - ONEWIRE=${ONEWIRE:-ON}
+      - JSONPLAT=${JSONPLAT:-OFF}
+      - IMRAA=${IMRAA:-OFF}
+      - FTDI4222=${FTDI4222:-OFF}
+      - IPK=${IPK:-OFF}
+      - RPM=${RPM:-OFF}
+      - ENABLEEXAMPLES=${ENABLEEXAMPLES:-ON}
+      - INSTALLGPIOTOOL=${INSTALLGPIOTOOL:-OFF}
+      - INSTALLTOOLS=${INSTALLTOOLS:-ON}
+      - CC=${CC:-clang-3.8}
+      - CXX=${CXX:-clang++-3.8}
+      - BUILDARCH=${BUILDARCH}
+    volumes:
+      - .:${MRAA_SRC_DIR:-/usr/src/app}
 
   doc:
-    extends: main
-    build:
-      args:
-        - BUILDDOC=ON
-    command: bash -c "make doc"
+    extends: base
+    image: dnoliver/mraa-all
+    environment:
+      - BUILDSWIG=ON
+      - BUILDSWIGPYTHON=ON
+      - BUILDSWIGNODE=ON
+      - BUILDSWIGJAVA=ON
+      - BUILDDOC=ON
+    command: bash -c "./scripts/run-cmake.sh && ./scripts/build-doc.sh"
+
+  sonar-scan:
+    extends: base
+    image: dnoliver/mraa-all
+    environment:
+      - BUILDSWIG=ON
+      - BUILDSWIGPYTHON=ON
+      - BUILDSWIGNODE=ON
+      - BUILDSWIGJAVA=ON
+      - ONEWIRE=ON
+      - JSONPLAT=ON
+      - SONAR_TOKEN
+      - SONAR_ORG
+      - SONAR_PROJ_KEY
+      - TRAVIS_BRANCH
+      - TRAVIS_PULL_REQUEST
+      - TRAVIS_REPO_SLUG
+      - TRAVIS_PULL_REQUEST_SLUG
+      - GITHUB_TOKEN
+    command: bash -c "./scripts/run-cmake.sh && cd build && ../scripts/sonar-scan.sh"
+
+  usbplat:
+    extends: base
+    image: dnoliver/mraa-all
+    environment:
+      - USBPLAT=ON
+    command: bash -c "./scripts/run-cmake.sh && make -Cbuild"
+
+  firmata:
+    extends: base
+    image: dnoliver/mraa-all
+    environment:
+      - FIRMATA=ON
+    command: bash -c "./scripts/run-cmake.sh && make -Cbuild"
+
+  imraa:
+    extends: base
+    image: dnoliver/mraa-all
+    environment:
+      - IMRAA=ON
+      - FIRMATA=ON
+    command: bash -c "./scripts/run-cmake.sh && make -Cbuild"
+
+  ftdi4442:
+    extends: base
+    image: dnoliver/mraa-all
+    environment:
+      - FTDI4222=ON
+    command: bash -c "./scripts/run-cmake.sh && make -Cbuild"
+
+  ipk:
+    extends: base
+    image: dnoliver/mraa-all
+    environment:
+      - IPK=ON
+    command: bash -c "./scripts/run-cmake.sh && make -Cbuild package"
+
+  rpm:
+    extends: base
+    image: dnoliver/mraa-all
+    environment:
+      - RPM=ON
+    command: bash -c "./scripts/run-cmake.sh && make -Cbuild package"
 
   python2:
-    extends: main
-    build:
-      args:
-        - BUILDSWIG=ON
-        - BUILDSWIGPYTHON=ON
-    command: bash -c "make _python2-mraa && ctest --output-on-failure"
+    extends: base
+    image: dnoliver/mraa-python
+    environment:
+      - BUILDSWIG=ON
+      - BUILDSWIGPYTHON=ON
+    command: bash -c "./scripts/run-cmake.sh && cd build && make _python2-mraa && ctest --output-on-failure"
 
   python3:
     extends: python2
-    build:
-      args:
-        - USEPYTHON3TESTS=ON
-    command: bash -c "make _python3-mraa && ctest --output-on-failure"
+    environment:
+      - USEPYTHON3TESTS=ON
+    command: bash -c "./scripts/run-cmake.sh && cd build && make _python3-mraa && ctest --output-on-failure"
 
   java:
-    extends: main
-    build:
-      args:
-        - BUILDSWIG=ON
-        - BUILDSWIGJAVA=ON
-        - CC=gcc-4.8
-        - CXX=g++-4.8
-    command: bash -c "make mraajava && ctest --output-on-failure"
+    extends: base
+    image: dnoliver/mraa-java
+    environment:
+      - BUILDSWIG=ON
+      - BUILDSWIGJAVA=ON
+    command: bash -c "./scripts/run-cmake.sh && cd build && make mraajava && ctest --output-on-failure"
+
+  android:
+    extends: java
+    image: dnoliver/mraa-android
+    environment:
+      - BUILDARCH=PERIPHERALMAN
+    command: bash -c "./scripts/build-android.sh"
 
   node4:
-    extends: main
-    build:
-      args:
-        - BUILDSWIG=ON
-        - BUILDSWIGNODE=ON
-        - NODE_VERSION=v4.4.7
-    command: bash -c "source /root/.nvm/nvm.sh && make npmpkg && cd .. && node-gyp configure && node-gyp build && npm test"
+    extends: base
+    image: dnoliver/mraa-node4
+    environment:
+      - BUILDSWIG=ON
+      - BUILDSWIGNODE=ON
+    command: bash -c "./scripts/run-cmake.sh && make -Cbuild npmpkg && node-gyp configure && node-gyp build && npm test"
 
   node5:
     extends: node4
-    build:
-      args:
-        - NODE_VERSION=v5.12.0
+    image: dnoliver/mraa-node5
+
+  node6:
+    extends: node4
+    image: dnoliver/mraa-node6

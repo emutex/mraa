@@ -21,7 +21,11 @@ set_property (SOURCE mraajs.i PROPERTY SWIG_FLAGS "-node"
               "-I${CMAKE_BINARY_DIR}/src" "-DV8_VERSION=${V8_VERSION_HEX}")
 set_source_files_properties (mraajs.i PROPERTIES CPLUSPLUS ON)
 
-swig_add_module (mraajs javascript mraajs.i)
+if (CMAKE_VERSION VERSION_LESS "3.8")
+  swig_add_module (mraajs javascript mraajs.i)
+else ()
+  swig_add_library (mraajs LANGUAGE javascript SOURCES mraajs.i)
+endif ()
 swig_link_libraries (mraajs mraa)
 
 set_target_properties (mraajs PROPERTIES
@@ -108,7 +112,7 @@ if (BUILDDOC)
   find_package(Yuidoc)
   if (YUIDOC_FOUND)
     add_custom_target(jsdoc ALL
-      COMMAND ${CMAKE_SOURCE_DIR}/doxygen2jsdoc/docgen.js -m mraa i xml/ -o jsdoc -c ${CMAKE_CURRENT_SOURCE_DIR}/doxygen2jsdoc_custom.json --strict -h
+      COMMAND ${CMAKE_SOURCE_DIR}/doxygen2jsdoc/docgen.js -m mraa -i xml/ -o jsdoc -c ${CMAKE_CURRENT_SOURCE_DIR}/doxygen2jsdoc_custom.json --strict
       COMMAND ${YUIDOC_EXECUTABLE} -C --no-sort --helpers ${CMAKE_SOURCE_DIR}/doxygen2jsdoc/generators/yuidoc/tmpl/mraa/helper.js --themedir ${CMAKE_SOURCE_DIR}/doxygen2jsdoc/generators/yuidoc/tmpl/mraa -o html/node jsdoc/yuidoc/mraa
       COMMAND ${CMAKE_SOURCE_DIR}/doxygen2jsdoc/tolower.js -i html/node
       WORKING_DIRECTORY ${CMAKE_BINARY_DIR}

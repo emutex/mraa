@@ -4,7 +4,7 @@ libmraa uses cmake in order to make compilation relatively painless. CMake runs
 build out of tree so the recommended way is to clone from git and make a `build/`
 directory inside the clone directory.
 
-For building imraa check [building imraa](./imraa.md)
+For building imraa check @ref buildingimraa page.
 ## Build dependencies
 Not all these are required but if you're unsure of what you're doing this is
 what you'll need:
@@ -95,8 +95,10 @@ Building doc, this will require [SPHINX](http://sphinx-doc.org) &
  `-DBUILDDOC=ON`
 You will also require clone git submodules from your existing checkout:
  `git submodule update --init --recursive`
-The from doxygen2jsdoc dir:
- `npm install mkdirp commander lodash bluebird pegjs`
+Then from doxygen2jsdoc dir:
+ `npm install`
+Then from doxyport dir:
+ `make setup`
 
 Override build architecture (this is useful because on x86 ARM code is not
 compiled so use this flag to force the target arch)
@@ -166,7 +168,7 @@ To run, make sure `libmraajava.so` is in `LD_LIBRARY_PATH`
 jave -cp $DIR_WHERE_YOU_INSTALLED_MRAA/mraa.jar:. Example
 ~~~~~~~~~~~~~
 
-If you want to add or improve Java bindings for mraa, please follow the [Creating Java Bindings Guide](https://github.com/intel-iot-devkit/upm/blob/master/docs/creating_java_bindings.md).
+If you want to add or improve Java bindings for mraa, please follow the <a href="https://github.com/intel-iot-devkit/upm/blob/master/docs/creating_java_bindings.md">Creating Java Bindings Guide</a>.
 
 ## Building an IPK/RPM package using `cpack`
 
@@ -195,7 +197,112 @@ The [Things Native Library](https://github.com/androidthings/native-libandroidth
 [FindAndroidThings.cmake](https://github.com/androidthings/native-libandroidthings/blob/master/FindAndroidThings.cmake). Make sure the directory containing this module is
 added to the CMAKE_MODULE_PATH.
 
-#### NDK r14b
+### NDK r14b
+
 ~~~~~~~~~~~~~{.sh}
 cmake -DBUILDSWIG=OFF -DBUILDARCH=PERIPHERALMAN -DANDROID_TOOLCHAIN_NAME=x86-i686 -DCMAKE_TOOLCHAIN_FILE=/path/to/android-ndk-r14b/build/cmake/android.toolchain.cmake -DCMAKE_MODULE_PATH=/path/to/native-libandroidthings ..
 ~~~~~~~~~~~~~
+
+## Building with Docker
+
+You can use `docker` and `docker-compose` to generate a complete build environment
+for mraa without having to install any other tool.
+
+Requirements:
+* [docker](https://www.docker.com/get-docker) >= 1.12.6
+* [docker-compose](https://docs.docker.com/compose/install/) >= 1.9.0
+
+**NOTE:** docker-compose is an optional requirement. It actually make running complex
+docker build and run command easier. But you can just use docker to build and run.
+
+### Using Docker Images to build Mraa
+
+**tl;dr:** Just use this commands to build mraa:
+
+```sh
+# Build mraa documentation
+$ docker-compose run doc
+# Build mraa python2 package and run python2 tests
+$ docker-compose run python2
+# Build mraa python3 package and run python3 tests
+$ docker-compose run python3
+# Build mraa java package and run java tests
+$ docker-compose run java
+# Build mraa node4 package
+$ docker-compose run node4
+# Build mraa node5 package
+$ docker-compose run node5
+# Build mraa node6 package
+$ docker-compose run node6
+# Build mraa for android things package
+$ docker-compose run android
+# Run Sonar Qube Scans for mraa
+$ docker-compose run sonar-scan
+```
+
+**docker-compose** will take a look at the `docker-compose.yaml` file in the repository
+root directory, pull the required docker image, and run an specific command to build
+mraa for the requested target.
+Once the build is completed, you will have a `build/` folder in the repository root with all
+the compiled code. This `build/` folder is created by using a docker volume. The `build\`
+folder contents is reused each time you execute `docker-compose run [TARGET]`.
+To know more about volumes in Docker, visit the [Docker Volume Documentation](https://docs.docker.com/engine/tutorials/dockervolumes/).
+
+You can also start an interactive session inside the docker container if you need to run some
+custom build commands:
+
+```sh
+# Start an interactive bash  shell inside the container
+$ docker-compose run python2 bash
+# From now, all the commands are executed inside the container
+$ cd build && cmake -DBUILDSWIGPYTHON=ON .. && make clean all
+```
+
+If you don't want to use docker-compose, you can also use `docker run` to build mraa.
+For example, to build mraa for python2, you can do:
+
+```sh
+# From the repository root folder
+$ docker run \
+      --volume=$(pwd):/usr/src/app \
+      --env BUILDSWIG=ON \
+      --env BUILDSWIGPYTHON=ON \
+      --env BUILDSWIGJAVA=OFF \
+      --env BUILDSWIGNODE=OFF \
+      dnoliver/mraa-python \
+      bash -c "./scripts/run-cmake.sh && make -Cbuild _python2-mraa"
+```
+
+### Proxy considerations
+
+If, for some reason, you are behind a proxy, find below a list of common problems related
+to proxy settings:
+
+**docker cannot pull images from docker.io**
+
+ Visit [this link](https://docs.docker.com/engine/admin/systemd/#httphttps-proxy)
+ to configure docker daemon behind a proxy.
+
+**docker run fails to access the internet**
+
+docker-compose will automatically take `http_proxy`, `https_proxy`, and `no_proxy`
+environment variables and use it as build arguments. Be sure to properly configure
+this variables before building.
+
+docker, unlinke docker-compose, do not take the proxy settings from the environment
+automatically. You need to send them as environment arguments:
+
+```sh
+# From the repository root folder
+$ docker run \
+    --volume=$(pwd):/usr/src/app \
+    --env BUILDSWIG=ON \
+    --env BUILDSWIGPYTHON=ON \
+    --env BUILDSWIGJAVA=OFF \
+    --env BUILDSWIGNODE=OFF \
+    --env http_proxy=$http_proxy \
+    --env https_proxy=$https_proxy \
+    --env no_proxy=$no_proxy \
+    dnoliver/mraa-python \
+    bash -c "./scripts/run-cmake.sh && make -Cbuild _python2-mraa"
+```
