@@ -41,6 +41,7 @@
 #include "x86/up2.h"
 
 #define PLATFORM_NAME "UP2"
+#define PLATFORM_VERSION "1.0.0"
 
 #define MRAA_UP2_GPIOCOUNT   28
 
@@ -109,6 +110,7 @@ mraa_up2_board()
     }
 
     b->platform_name = PLATFORM_NAME;
+    b->platform_version = PLATFORM_VERSION;
     b->phy_pin_count = MRAA_UP2_PINCOUNT;
     b->gpio_count = MRAA_UP2_GPIOCOUNT;
 
